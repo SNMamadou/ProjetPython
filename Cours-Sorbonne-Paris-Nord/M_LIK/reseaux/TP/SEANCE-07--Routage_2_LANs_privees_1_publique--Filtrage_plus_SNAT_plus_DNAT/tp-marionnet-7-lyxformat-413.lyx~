@@ -1,0 +1,664 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\date{}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Travaux Pratiques
+\begin_inset Newline newline
+\end_inset
+
+Routage, filtrage (pare-feu) et NAT
+\end_layout
+
+\begin_layout Author
+Copyright (C) 2012-2015
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Jean-Vincent Loddo
+\begin_inset Newline newline
+\end_inset
+
+
+\size normal
+Licence Creative Commons Paternité - Partage à l'Identique 3.0 non transposé.
+\end_layout
+
+\begin_layout Standard
+Séance de TP entièrement effectuée avec le logiciel Marionnet.
+ Durée estimée
+\begin_inset space ~
+\end_inset
+
+: 2h - 2h30.
+\end_layout
+
+\begin_layout Paragraph*
+Prérequis.
+ 
+\end_layout
+
+\begin_layout Standard
+Notions de routage, filtrage et NAT (SNAT et DNAT) et leur interdépendance.
+\end_layout
+
+\begin_layout Section*
+Câblage et configuration du réseau local
+\end_layout
+
+\begin_layout Standard
+Deux machines, 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+ et 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+ et un concentrateur 
+\begin_inset Formula $H_{1}$
+\end_inset
+
+ réalisent un réseau local 
+\begin_inset Formula $LAN_{1}=\{m_{1},m_{2}\}$
+\end_inset
+
+ en 
+\begin_inset Formula $192.168.1.0/24$
+\end_inset
+
+.
+ Deux autres machines 
+\begin_inset Formula $m_{3}$
+\end_inset
+
+ et 
+\begin_inset Formula $m_{4}$
+\end_inset
+
+ et un concentrateur 
+\begin_inset Formula $H_{2}$
+\end_inset
+
+ réalisent un réseau local 
+\begin_inset Formula $LAN_{2}=\{m_{3},m_{4}\}$
+\end_inset
+
+ en 
+\begin_inset Formula $10.0.0.0/8$
+\end_inset
+
+.
+ Un troisième réseau 
+\begin_inset Formula $CAN_{1}$
+\end_inset
+
+ (Campus Area Network) sera constitué d'une machine appelée 
+\begin_inset Formula $intrus$
+\end_inset
+
+ et d'une partie indéfinie (de niveau 2) représentée par le composant marionnet
+ 
+\begin_inset Quotes eld
+\end_inset
+
+nuage
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Une machine faisant office de routeur assurera la laison (de niveau 
+\begin_inset Formula $3$
+\end_inset
+
+) entre 
+\begin_inset Formula $LAN_{1}$
+\end_inset
+
+ (port 
+\begin_inset Formula $0$
+\end_inset
+
+), 
+\begin_inset Formula $LAN_{2}$
+\end_inset
+
+ (port 
+\begin_inset Formula $1$
+\end_inset
+
+) et 
+\begin_inset Formula $CAN_{1}$
+\end_inset
+
+ (port 
+\begin_inset Formula $2$
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Paragraph
+Distributions GNU/Linux.
+\end_layout
+
+\begin_layout Standard
+Utilisez n'importe quelle distribution
+\begin_inset space ~
+\end_inset
+
+: il suffira de pouvoir lancer les commandes basiques de configuration et
+ observation du réseau (
+\family typewriter
+ifconfig
+\family default
+, 
+\family typewriter
+route
+\family default
+, 
+\family typewriter
+tcpdump
+\family default
+, ...)
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/plan_avec_machine_routeur_firewall.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Attribution des IP.
+\end_layout
+
+\begin_layout Standard
+Par simplicité, la machine 
+\begin_inset Formula $m_{i}$
+\end_inset
+
+ aura l'adresse 
+\begin_inset Formula $192.168.1.i$
+\end_inset
+
+ ou 
+\begin_inset Formula $10.0.0.i$
+\end_inset
+
+ selon le réseau d'appartenance.
+ Le routeur 
+\begin_inset Formula $routeur$
+\end_inset
+
+ doit avoir son port 
+\begin_inset Formula $0$
+\end_inset
+
+ branché au 
+\begin_inset Formula $LAN_{1}$
+\end_inset
+
+ et configuré en 
+\begin_inset Formula $192.168.1.254$
+\end_inset
+
+.
+ Concernant le réseau 
+\begin_inset Formula $CAN_{1}$
+\end_inset
+
+ (
+\begin_inset Formula $145.12.0.0/16$
+\end_inset
+
+), la machine 
+\begin_inset Formula $intrus$
+\end_inset
+
+ prendra le 
+\begin_inset Formula $145.12.0.42$
+\end_inset
+
+, et le routeur prendra le 
+\begin_inset Formula $145.12.0.53$
+\end_inset
+
+ sur le port 
+\begin_inset Formula $2$
+\end_inset
+
+ (
+\family typewriter
+eth2
+\family default
+).
+\end_layout
+
+\begin_layout Part
+Routage
+\end_layout
+
+\begin_layout Standard
+Configurer le routage sur la machine 
+\begin_inset Formula $routeur$
+\end_inset
+
+ et définissez-la comme passerelle pour toutes les autres machines du réseaux.
+ Testez avec la commande 
+\family typewriter
+ping
+\family default
+ que toutes les machines puissent communiquer avec toutes les autres.
+\end_layout
+
+\begin_layout Paragraph
+Test et remarques
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+observez que la machine 
+\begin_inset Formula $intrus$
+\end_inset
+
+ reçoit (et répond) aux ping (ECHO REQUEST/REPLY du protocole ICMP) des
+ machines du 
+\begin_inset Formula $LAN_{1}$
+\end_inset
+
+ et du 
+\begin_inset Formula $LAN_{2}$
+\end_inset
+
+, même si elles appartiennent à un réseau à priori 
+\series bold
+privé
+\series default
+
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_layout LyX-Code
+m1# ping 145.12.0.42
+\end_layout
+
+\begin_layout LyX-Code
+intrus# tcpdump -i eth0
+\end_layout
+
+\begin_layout Standard
+Cette situation 
+\bar under
+n'est pas souhaitable
+\bar default
+ pour plusieurs raisons
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $intrus$
+\end_inset
+
+ a défini 
+\begin_inset Formula $145.12.0.53$
+\end_inset
+
+ comme passerelle par défaut, ce qui est 
+\emph on
+abusif
+\emph default
+ : il devrait ignorer l'existence des réseaux privés
+\begin_inset space ~
+\end_inset
+
+; ces derniers devraient, dans l'idéal, être 
+\emph on
+cachés
+\emph default
+ derrière le routeur
+\begin_inset space ~
+\end_inset
+
+; 
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $intrus$
+\end_inset
+
+ peut lui même pinguer les réseaux privés, ce qui veut dire que 
+\begin_inset Formula $routeur$
+\end_inset
+
+ 
+\bar under
+laisse passer toutes les trames
+\bar default
+ (
+\emph on
+pas de filtrage
+\emph default
+), même celles qui correspondent à des 
+\emph on
+initiatives
+\emph default
+ de l'extérieur vers les réseaux privés (et dans ce contexte, 
+\emph on
+initiative
+\emph default
+ peut vouloir dire 
+\emph on
+attaque
+\emph default
+)
+\begin_inset space ~
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Enumerate
+lorsque l'initiative est prise par l'intérieur, comme dans le cas d'un ping
+ depuis 
+\begin_inset Formula $LAN_{1}$
+\end_inset
+
+ ou 
+\begin_inset Formula $LAN_{2}$
+\end_inset
+
+ vers 
+\begin_inset Formula $intrus$
+\end_inset
+
+, la machine 
+\begin_inset Formula $routeur$
+\end_inset
+
+ 
+\bar under
+laisse passer les paquets IP sans les changer
+\bar default
+ (
+\emph on
+pas de NAT
+\emph default
+) et 
+\begin_inset Formula $intrus$
+\end_inset
+
+ constate donc la réception de messages provenant d'adresse telles que 
+\begin_inset Formula $192.168.1.0/24$
+\end_inset
+
+ ou 
+\begin_inset Formula $10.0.0.8$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+; s'il ne le sait pas déjà, il peut donc imaginer pouvoir utiliser 
+\begin_inset Formula $routeur$
+\end_inset
+
+ pour atteindre ces adresses.
+ Autrement dit, s'il l'ignorait auparavant, il n'ignorera plus l'existence
+ de ces réseaux, ce qui nous ramène au problème soulevé au point 
+\begin_inset Formula $1$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Il faut donc configurer le filtrage et la traduction d'adresses pour 
+\series bold
+protéger
+\series default
+ et 
+\series bold
+cacher
+\series default
+ la structure interne du réseau privé aux yeux de l'extérieur.
+\end_layout
+
+\begin_layout Part
+Filtrage et SNAT
+\end_layout
+
+\begin_layout Standard
+Supposons que la machine 
+\begin_inset Formula $intrus$
+\end_inset
+
+ offre un service HTTP; lancez donc une serveur http sur cette machine.
+ Configurer le filtrage sur la machine 
+\begin_inset Formula $routeur$
+\end_inset
+
+ de façon qu'elle protège l'ensemble des réseaux privés 
+\begin_inset Formula $LAN_{1}$
+\end_inset
+
+ et 
+\begin_inset Formula $LAN_{2}$
+\end_inset
+
+, c'est-à-dire de façon que
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Description
+(a) 
+\begin_inset Formula $intrus$
+\end_inset
+
+ ne pourra pas avoir accès à ces réseaux privés
+\end_layout
+
+\begin_layout Description
+(b) toutes les machines des réseaux privés auront accès au serveur web de
+ 
+\begin_inset Formula $intrus$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+(c) 
+\begin_inset Formula $intrus$
+\end_inset
+
+ aura toujours l'impression que les requêtes proviennent de 
+\begin_inset Formula $routeur$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+Suggestion
+\begin_inset space ~
+\end_inset
+
+: pour obtenir (a) et (b) utiliser le module 
+\family typewriter
+state
+\family default
+ de 
+\family typewriter
+iptables
+\family default
+ pour définir des règles selon l'état 
+\family typewriter
+NEW
+\family default
+, 
+\family typewriter
+ESTABLISHED
+\family default
+ ou 
+\family typewriter
+RELATED
+\family default
+ (cf.
+ 
+\family typewriter
+man iptables
+\family default
+); pour obtenir (c) utiliser une règle SNAT.
+\end_layout
+
+\begin_layout Standard
+Vérifier le résultat de votre configuration avec 
+\family typewriter
+tcpdump
+\family default
+ ou 
+\family typewriter
+wireshark
+\family default
+.
+\end_layout
+
+\begin_layout Part
+DNAT
+\end_layout
+
+\begin_layout Standard
+Supposons à présent que la machine 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+ offre un service HTTP et que 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+ offre un service de connexion à distance SSH; lancez donc ces services.
+ Ajouter une règle au pare-feu de façon que
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Description
+(d) 
+\begin_inset Formula $intrus$
+\end_inset
+
+ pourra être client des services HTTP de 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+ et SSH de 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+ 
+\bar under
+mais
+\bar default
+ en ayant toujours l'impression que ces services soient rendus par 
+\begin_inset Formula $routeur$
+\end_inset
+
+ qui, à ses yeux, sera donc son 
+\bar under
+seul possible interlocuteur
+\bar default
+.
+\end_layout
+
+\end_body
+\end_document

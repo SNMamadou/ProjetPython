@@ -1,0 +1,148 @@
+%% LyX 2.3.4.2 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[french]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm}
+\usepackage{graphicx}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+\newenvironment{lyxcode}
+	{\par\begin{list}{}{
+		\setlength{\rightmargin}{\leftmargin}
+		\setlength{\listparindent}{0pt}% needed for AMS classes
+		\raggedright
+		\setlength{\itemsep}{0pt}
+		\setlength{\parsep}{0pt}
+		\normalfont\ttfamily}%
+	 \item[]}
+	{\end{list}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\date{}
+
+\makeatother
+
+\usepackage{babel}
+\makeatletter
+\addto\extrasfrench{%
+   \providecommand{\og}{\leavevmode\flqq~}%
+   \providecommand{\fg}{\ifdim\lastskip>\z@\unskip\fi~\frqq}%
+}
+
+\makeatother
+\begin{document}
+\title{Travaux Pratiques\\
+Routage, SNAT, DNAT, \\
+entre réseaux privés et réseaux publics}
+\author{Copyright (C) 2021~~Jean-Vincent Loddo\\
+{\normalsize{}Licence Creative Commons Paternité - Partage à l'Identique
+3.0 non transposé.}}
+
+\maketitle
+Séance de TP entièrement effectuée avec le logiciel Marionnet. Durée
+estimée~: 1h30
+
+\paragraph*{Prérequis. }
+
+Notions de routage, NAT (SNAT et DNAT) et leur interdépendance.
+
+\section*{Câblage et configuration du réseau local}
+
+Deux machines, $m_{1}$ et $m_{2}$ et un concentrateur $H_{1}$ réalisent
+un réseau local $LAN_{1}=\{m_{1},m_{2}\}$ en $192.168.1.0/24$. Deux
+autres machines $m_{3}$ et $m_{4}$ et un concentrateur $H_{2}$
+réalisent un réseau local $LAN_{2}=\{m_{3},m_{4}\}$ en $10.10.0.0/16$.
+Un troisième réseau $CAN_{1}$ (Campus Area Network) contiendra une
+machine appelée $laptop$ et une autre appelée $google$. Une machine
+faisant office de routeur assurera la liaison (de niveau $3$) entre
+$LAN_{1}$ (port $0$), $LAN_{2}$ (port $1$) et $CAN_{1}$ (port
+$2$).
+
+\paragraph{Distributions GNU/Linux.}
+
+Utilisez la distribution Debian \emph{wheezy} pour pouvoir lancer
+les commandes basiques de configuration et observation du réseau (\texttt{ifconfig},
+\texttt{route}, \texttt{wireshark, tcpdump}, ...)
+\begin{center}
+\includegraphics[scale=0.46]{images/plan_avec_machine_routeur_snat_dnat}
+\par\end{center}
+
+\paragraph{Attribution des IP.}
+
+Par simplicité, la machine $m_{i}$ aura l'adresse $192.168.1.i$
+ou $10.10.0.i$ selon le réseau d'appartenance. Le routeur $routeur$
+prend la dernière adresse disponible sur les deux réseaux privés.
+Concernant le réseau $CAN$ ($145.12.0.0/16$), la machine $laptop$
+prendra le $145.12.0.42$, $google$ prendra le $145.12.0.84$, et
+le $routeur$ (qui est une machine ordinaire sur le réseau public)
+prendra le $145.12.0.53$ sur le port $2$ (\texttt{eth2}).
+
+\part{Routage}
+
+Configurer la machine $routeur$ et définissez-la comme passerelle
+pour toutes les autres machines du réseaux, même si cela est \textbf{abusif}
+(et non souhaité) pour le réseau public (pour lequel $routeur$ n'est
+pas une passerelle mais une machine tout à fait ordinaire du réseau
+$CAN$). Testez avec la commande \texttt{ping} que toutes les machines
+puissent communiquer avec toutes les autres.
+
+\part{SNAT}
+
+Activez des services réseau : par exemple les services TCP \texttt{apache2}
+sur $google$ et \texttt{ssh} sur $laptop$. Configurez le SNAT sur
+$routeur$ avec la commande \texttt{iptables} de façon que tout paquet
+provenant des réseaux privés ait comme source (apparente) $routeur$
+aux yeux de $laptop$ et $google$. Capturez les trames avec \texttt{wireshark}
+sur ces deux machines pour vérifier que le SNAT fonctionne correctement.
+
+\subsubsection*{Exemple à adapter à notre réseau~:}
+\begin{lyxcode}
+iptables~-t~nat~-A~POSTROUTING~-o~eth3~-s~172.23.5.0/24~-j~MASQUERADE
+\end{lyxcode}
+
+\subsubsection*{Autres commandes utiles~:}
+\begin{itemize}
+\item pour afficher la liste (\texttt{-L}) des règles de NAT actuellement
+définies~:
+\begin{lyxcode}
+iptables~-t~nat~-L~~~~~~~~~~~~{\small{}~~\#~ajouter~-v~pour~un~rendu~plus~détaillé~(verbeux)}{\small\par}
+\end{lyxcode}
+\item pour effacer une règle définie précédemment~: on reprend la même
+commande en remplaçant \texttt{-A} (append) par \texttt{-D} (delete)~;
+pour l'exemple ci-dessus, cela donnerait~:
+\begin{lyxcode}
+iptables~-t~nat~-D~POSTROUTING~-o~eth3~-s~172.23.5.0/24~-j~MASQUERADE~~~~
+\end{lyxcode}
+\end{itemize}
+
+\part{DNAT}
+
+Activez des services réseau dans les réseaux locaux~: par exemple
+les services \texttt{apache2} (\texttt{HTTP/TCP{[}80{]}}) sur $m1$
+et \texttt{ssh} (\texttt{SSH/TCP{[}22{]}}) sur $m4$. Configurez le
+DNAT sur $routeur$ de façon que tout paquet provenant du réseau public
+$CAN$ ait comme destinataire (apparent) $routeur$ (aux yeux de $laptop$
+et $google$). Capturez les trames avec \texttt{wireshark} sur les
+réseaux privés pour vérifier que le DNAT fonctionne correctement.
+Enlevez donc la route par défaut $routeur$ (qui était abusives) des
+machines $laptop$ et $google$. Tout devrait continuer de fonctionner
+(vérifiez à nouveau avec \texttt{wireshark}).
+
+\subsubsection*{Exemples à adapter à notre réseau~:}
+\begin{lyxcode}
+iptables~-t~nat~-A~PREROUTING~-i~eth3~-p~udp~-{}-dport~53~~~-j~DNAT~-{}-to~172.23.5.98
+
+iptables~-t~nat~-A~PREROUTING~-i~eth3~-p~udp~-{}-dport~5353~-j~DNAT~-{}-to~172.23.5.99:53\bigskip{}
+\end{lyxcode}
+Une fois les services web (HTTP) et de connexion à distance (SSH)
+fonctionnant et correctement accessibles (DNAT+SNAT) depuis le $CAN$,
+activez un deuxième service \texttt{apache2} (HTTP/TCP{[}80{]}) sur
+$m3$ et donnez accès aux machines du $CAN$, c'est-à-dire $laptop$
+et $google$, à ce deuxième site web accessible par le port (fictif)
+\texttt{8080} du $routeur$ (pour distinguer les sites web, modifiez
+les pages d'accueil, c'est-à-dire les fichiers \texttt{/var/www/index.html},
+sur $m1$ et $m3$).
+\end{document}

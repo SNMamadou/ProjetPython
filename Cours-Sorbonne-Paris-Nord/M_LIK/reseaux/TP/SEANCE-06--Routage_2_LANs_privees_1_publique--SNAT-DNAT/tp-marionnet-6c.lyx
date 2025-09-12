@@ -1,0 +1,632 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\date{}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Travaux Pratiques
+\begin_inset Newline newline
+\end_inset
+
+Routage, SNAT, DNAT, 
+\begin_inset Newline newline
+\end_inset
+
+entre réseaux privés et réseaux publics
+\end_layout
+
+\begin_layout Author
+Copyright (C) 2021
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Jean-Vincent Loddo
+\begin_inset Newline newline
+\end_inset
+
+
+\size normal
+Licence Creative Commons Paternité - Partage à l'Identique 3.0 non transposé.
+\end_layout
+
+\begin_layout Standard
+Séance de TP entièrement effectuée avec le logiciel Marionnet.
+ Durée estimée
+\begin_inset space ~
+\end_inset
+
+: 1h30
+\end_layout
+
+\begin_layout Paragraph*
+Prérequis.
+ 
+\end_layout
+
+\begin_layout Standard
+Notions de routage, NAT (SNAT et DNAT) et leur interdépendance.
+\end_layout
+
+\begin_layout Section*
+Câblage et configuration du réseau local
+\end_layout
+
+\begin_layout Standard
+Deux machines, 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+ et 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+ et un concentrateur 
+\begin_inset Formula $H_{1}$
+\end_inset
+
+ réalisent un réseau local 
+\begin_inset Formula $LAN_{1}=\{m_{1},m_{2}\}$
+\end_inset
+
+ en 
+\begin_inset Formula $192.168.1.0/24$
+\end_inset
+
+.
+ Deux autres machines 
+\begin_inset Formula $m_{3}$
+\end_inset
+
+ et 
+\begin_inset Formula $m_{4}$
+\end_inset
+
+ et un concentrateur 
+\begin_inset Formula $H_{2}$
+\end_inset
+
+ réalisent un réseau local 
+\begin_inset Formula $LAN_{2}=\{m_{3},m_{4}\}$
+\end_inset
+
+ en 
+\begin_inset Formula $10.10.0.0/16$
+\end_inset
+
+.
+ Un troisième réseau 
+\begin_inset Formula $CAN_{1}$
+\end_inset
+
+ (Campus Area Network) contiendra une machine appelée 
+\begin_inset Formula $laptop$
+\end_inset
+
+ et une autre appelée 
+\begin_inset Formula $google$
+\end_inset
+
+.
+ Une machine faisant office de routeur assurera la liaison (de niveau 
+\begin_inset Formula $3$
+\end_inset
+
+) entre 
+\begin_inset Formula $LAN_{1}$
+\end_inset
+
+ (port 
+\begin_inset Formula $0$
+\end_inset
+
+), 
+\begin_inset Formula $LAN_{2}$
+\end_inset
+
+ (port 
+\begin_inset Formula $1$
+\end_inset
+
+) et 
+\begin_inset Formula $CAN_{1}$
+\end_inset
+
+ (port 
+\begin_inset Formula $2$
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Paragraph
+Distributions GNU/Linux.
+\end_layout
+
+\begin_layout Standard
+Utilisez la distribution Debian 
+\emph on
+wheezy
+\emph default
+ pour pouvoir lancer les commandes basiques de configuration et observation
+ du réseau (
+\family typewriter
+ifconfig
+\family default
+, 
+\family typewriter
+route
+\family default
+, 
+\family typewriter
+wireshark, tcpdump
+\family default
+, ...)
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/plan_avec_machine_routeur_snat_dnat.png
+	scale 46
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Attribution des IP.
+\end_layout
+
+\begin_layout Standard
+Par simplicité, la machine 
+\begin_inset Formula $m_{i}$
+\end_inset
+
+ aura l'adresse 
+\begin_inset Formula $192.168.1.i$
+\end_inset
+
+ ou 
+\begin_inset Formula $10.10.0.i$
+\end_inset
+
+ selon le réseau d'appartenance.
+ Le routeur 
+\begin_inset Formula $routeur$
+\end_inset
+
+ prend la dernière adresse disponible sur les deux réseaux privés.
+ Concernant le réseau 
+\begin_inset Formula $CAN$
+\end_inset
+
+ (
+\begin_inset Formula $145.12.0.0/16$
+\end_inset
+
+), la machine 
+\begin_inset Formula $laptop$
+\end_inset
+
+ prendra le 
+\begin_inset Formula $145.12.0.42$
+\end_inset
+
+, 
+\begin_inset Formula $google$
+\end_inset
+
+ prendra le 
+\begin_inset Formula $145.12.0.84$
+\end_inset
+
+, et le 
+\begin_inset Formula $routeur$
+\end_inset
+
+ (qui est une machine ordinaire sur le réseau public) prendra le 
+\begin_inset Formula $145.12.0.53$
+\end_inset
+
+ sur le port 
+\begin_inset Formula $2$
+\end_inset
+
+ (
+\family typewriter
+eth2
+\family default
+).
+\end_layout
+
+\begin_layout Part
+Routage
+\end_layout
+
+\begin_layout Standard
+Configurer la machine 
+\begin_inset Formula $routeur$
+\end_inset
+
+ et définissez-la comme passerelle pour toutes les autres machines du réseaux,
+ même si cela est 
+\series bold
+abusif
+\series default
+ (et non souhaité) pour le réseau public (pour lequel 
+\begin_inset Formula $routeur$
+\end_inset
+
+ n'est pas une passerelle mais une machine tout à fait ordinaire du réseau
+ 
+\begin_inset Formula $CAN$
+\end_inset
+
+).
+ Testez avec la commande 
+\family typewriter
+ping
+\family default
+ que toutes les machines puissent communiquer avec toutes les autres.
+\end_layout
+
+\begin_layout Part
+SNAT
+\end_layout
+
+\begin_layout Standard
+Activez des services réseau : par exemple les services TCP 
+\family typewriter
+apache2
+\family default
+ sur 
+\begin_inset Formula $google$
+\end_inset
+
+ et 
+\family typewriter
+ssh
+\family default
+ sur 
+\begin_inset Formula $laptop$
+\end_inset
+
+.
+ Configurez le SNAT sur 
+\begin_inset Formula $routeur$
+\end_inset
+
+ avec la commande 
+\family typewriter
+iptables
+\family default
+ de façon que tout paquet provenant des réseaux privés ait comme source
+ (apparente) 
+\begin_inset Formula $routeur$
+\end_inset
+
+ aux yeux de 
+\begin_inset Formula $laptop$
+\end_inset
+
+ et 
+\begin_inset Formula $google$
+\end_inset
+
+.
+ Capturez les trames avec 
+\family typewriter
+wireshark
+\family default
+ sur ces deux machines pour vérifier que le SNAT fonctionne correctement.
+\end_layout
+
+\begin_layout Subsubsection*
+Exemple à adapter à notre réseau
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_layout LyX-Code
+iptables -t nat -A POSTROUTING -o eth3 -s 172.23.5.0/24 -j MASQUERADE
+\end_layout
+
+\begin_layout Subsubsection*
+Autres commandes utiles
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Itemize
+pour afficher la liste (
+\family typewriter
+-L
+\family default
+) des règles de NAT actuellement définies
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+iptables -t nat -L            
+\size small
+  # ajouter -v pour un rendu plus détaillé (verbeux)
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+pour effacer une règle définie précédemment
+\begin_inset space ~
+\end_inset
+
+: on reprend la même commande en remplaçant 
+\family typewriter
+-A
+\family default
+ (append) par 
+\family typewriter
+-D
+\family default
+ (delete)
+\begin_inset space ~
+\end_inset
+
+; pour l'exemple ci-dessus, cela donnerait
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+iptables -t nat -D POSTROUTING -o eth3 -s 172.23.5.0/24 -j MASQUERADE    
+\end_layout
+
+\end_deeper
+\begin_layout Part
+DNAT
+\end_layout
+
+\begin_layout Standard
+Activez des services réseau dans les réseaux locaux
+\begin_inset space ~
+\end_inset
+
+: par exemple les services 
+\family typewriter
+apache2
+\family default
+ (
+\family typewriter
+HTTP/TCP[80]
+\family default
+) sur 
+\begin_inset Formula $m1$
+\end_inset
+
+ et 
+\family typewriter
+ssh
+\family default
+ (
+\family typewriter
+SSH/TCP[22]
+\family default
+) sur 
+\begin_inset Formula $m4$
+\end_inset
+
+.
+ Configurez le DNAT sur 
+\begin_inset Formula $routeur$
+\end_inset
+
+ de façon que tout paquet provenant du réseau public 
+\begin_inset Formula $CAN$
+\end_inset
+
+ ait comme destinataire (apparent) 
+\begin_inset Formula $routeur$
+\end_inset
+
+ (aux yeux de 
+\begin_inset Formula $laptop$
+\end_inset
+
+ et 
+\begin_inset Formula $google$
+\end_inset
+
+).
+ Capturez les trames avec 
+\family typewriter
+wireshark
+\family default
+ sur les réseaux privés pour vérifier que le DNAT fonctionne correctement.
+ Enlevez donc la route par défaut 
+\begin_inset Formula $routeur$
+\end_inset
+
+ (qui était abusives) des machines 
+\begin_inset Formula $laptop$
+\end_inset
+
+ et 
+\begin_inset Formula $google$
+\end_inset
+
+.
+ Tout devrait continuer de fonctionner (vérifiez à nouveau avec 
+\family typewriter
+wireshark
+\family default
+).
+\end_layout
+
+\begin_layout Subsubsection*
+Exemples à adapter à notre réseau
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_layout LyX-Code
+iptables -t nat -A PREROUTING -i eth3 -p udp --dport 53   -j DNAT --to 172.23.5.98
+\end_layout
+
+\begin_layout LyX-Code
+iptables -t nat -A PREROUTING -i eth3 -p udp --dport 5353 -j DNAT --to 172.23.5.99:
+53
+\begin_inset VSpace bigskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Une fois les services web (HTTP) et de connexion à distance (SSH) fonctionnant
+ et correctement accessibles (DNAT+SNAT) depuis le 
+\begin_inset Formula $CAN$
+\end_inset
+
+, activez un deuxième service 
+\family typewriter
+apache2
+\family default
+ (HTTP/TCP[80]) sur 
+\begin_inset Formula $m3$
+\end_inset
+
+ et donnez accès aux machines du 
+\begin_inset Formula $CAN$
+\end_inset
+
+, c'est-à-dire 
+\begin_inset Formula $laptop$
+\end_inset
+
+ et 
+\begin_inset Formula $google$
+\end_inset
+
+, à ce deuxième site web accessible par le port (fictif) 
+\family typewriter
+8080
+\family default
+ du 
+\begin_inset Formula $routeur$
+\end_inset
+
+ (pour distinguer les sites web, modifiez les pages d'accueil, c'est-à-dire
+ les fichiers 
+\family typewriter
+/var/www/index.html
+\family default
+, sur 
+\begin_inset Formula $m1$
+\end_inset
+
+ et 
+\begin_inset Formula $m3$
+\end_inset
+
+).
+\end_layout
+
+\end_body
+\end_document

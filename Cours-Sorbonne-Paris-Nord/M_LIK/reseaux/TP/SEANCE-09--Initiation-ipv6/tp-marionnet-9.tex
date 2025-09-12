@@ -1,0 +1,191 @@
+%% LyX 2.0.8.1 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[french]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm}
+\usepackage{graphicx}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+\newenvironment{lyxcode}
+{\par\begin{list}{}{
+\setlength{\rightmargin}{\leftmargin}
+\setlength{\listparindent}{0pt}% needed for AMS classes
+\raggedright
+\setlength{\itemsep}{0pt}
+\setlength{\parsep}{0pt}
+\normalfont\ttfamily}%
+ \item[]}
+{\end{list}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+% Added by lyx2lyx
+%  for proper underlining
+\PassOptionsToPackage{normalem}{ulem}
+\usepackage{ulem}
+\let\cite@rig\cite
+\newcommand{\b@xcite}[2][\%]{\def\def@pt{\%}\def\pas@pt{#1}
+  \mbox{\ifx\def@pt\pas@pt\cite@rig{#2}\else\cite@rig[#1]{#2}\fi}}
+\renewcommand{\underbar}[1]{{\let\cite\b@xcite\uline{#1}}}
+\date{}
+
+\makeatother
+
+\usepackage{babel}
+\makeatletter
+\addto\extrasfrench{%
+   \providecommand{\og}{\leavevmode\flqq~}%
+   \providecommand{\fg}{\ifdim\lastskip>\z@\unskip\fi~\frqq}%
+}
+
+\makeatother
+\begin{document}
+
+\title{Travaux Pratiques\\
+Initiation IPv6\\
+Configuration, Auto-configuration, Routage}
+
+
+\author{Copyright (C) 2016~~Jean-Vincent Loddo\\
+{\normalsize{}Licence Creative Commons Paternité - Partage à l'Identique
+3.0 non transposé.}}
+
+\maketitle
+Séance de TP entièrement effectuée avec le logiciel Marionnet. Durée
+estimée~: 1h30.
+
+
+\paragraph*{Prérequis. }
+
+Initiation à IPv6 (format, adresses, quelques éléments de ICMPv6,
+commande \texttt{ip}).
+
+
+\section{Câblage et configuration des réseaux lien-local (locaux, privés)}
+
+On utilise $5$ machines, $m_{1}$, $m_{2}$, $Router$, $m_{3}$
+et $m_{4}$, dont une en particulier, $Router$, équipée de $2$ interfaces
+réseau $eth0$ et $eth1$. Utilisez la distribution Debian wheezy
+sur toutes les machines. Les deux réseau locaux $LAN_{1}=\{m_{1},m_{2},Router[0]\}$
+et $LAN_{2}=\{Router[1],m_{3},m_{4}\}$ seront réalisés par des hubs
+(de façon à pouvoir observer facilement le trafic). Déclenchez l'auto-configuration
+des adresses lien-local de façon à pouvoir communiquer entre les machines
+des deux réseaux (sans routage évidemment, qui n'a pas de sens pour
+les adresses lien-local). Testez les connexions avec \texttt{ping6}
+et \texttt{ssh} tout en observant le trafic généré avec des instances
+de \texttt{wireshark} tournant sur $m_{2}$ et $m_{4}$. 
+
+\begin{center}
+\includegraphics[scale=0.5]{images/tp-marionnet-9-plan}
+\par\end{center}
+
+
+\subsection*{Rappel syntaxe commande \texttt{ip} sous Linux (par l'exemple)}
+
+
+\subsubsection*{Activer/désactiver une interface}
+\begin{lyxcode}
+ip~link~set~dev~eth0~up~~~~~~~~~~~~~~~~~~~~~~~~~~~~\#~équivalent~à~\textquotedbl{}ifconfig~eth0~up\textquotedbl{}
+
+ip~link~set~dev~eth0~down~~~~~~~~~~~~~~~~~~~~~~~~~~\#~juste~\textquotedbl{}down\textquotedbl{}~à~la~place~de~\textquotedbl{}up\textquotedbl{}
+\end{lyxcode}
+
+\subsubsection*{Afficher l'état d'une interface}
+\begin{lyxcode}
+ip~-6~addr~show~dev~eth0
+\end{lyxcode}
+
+\subsubsection*{Ajouter/éliminer une adresse IPv6}
+\begin{lyxcode}
+ip~-6~addr~add~2001:0db8:0:f101::1/64~dev~eth0
+
+ip~-6~addr~del~2001:0db8:0:f101::1/64~dev~eth0~~~~~\#~juste~\textquotedbl{}del\textquotedbl{}~à~la~place~de~\textquotedbl{}add\textquotedbl{}
+\end{lyxcode}
+
+\subsubsection*{Afficher le voisinage IPv6 (correspondant de ARP)}
+\begin{lyxcode}
+ip~-6~neigh~show
+\end{lyxcode}
+
+\subsubsection*{Afficher les routes IPv6}
+\begin{lyxcode}
+ip~-6~route~show
+\end{lyxcode}
+
+\subsubsection*{Ajouter/éliminer une route IPv6}
+\begin{lyxcode}
+ip~-6~route~add~default~via~2001:0db8:0:f101::1~~~~\#~NETWORK/LEN~(CIDR)~au~lieu~de~\textquotedbl{}default\textquotedbl{}
+
+ip~-6~route~del~default~via~2001:0db8:0:f101::1~~~~\#~juste~\textquotedbl{}del\textquotedbl{}~à~la~place~de~\textquotedbl{}add\textquotedbl{}
+\end{lyxcode}
+
+\subsubsection*{Activer le routage IPv6 du noyau Linux}
+\begin{lyxcode}
+echo~1~>/proc/sys/net/ipv6/conf/all/forwarding
+\end{lyxcode}
+
+\section{Configuration manuelle des adresses IPv6 globales et routage}
+
+Configurer \textbf{manuellement} les interfaces de toutes les machines
+des deux réseaux $2002\!::\!\!/64$ et $3003\!::\!\!/64$. Par simplicité,
+la machine $m_{i}$ aura le dernier groupe égal à $i$. Configurer
+aussi le routage statique. Testez à nouveau les connexions avec \texttt{ping6}
+et \texttt{ssh}, dans chacun des réseaux et entre les deux (routage),
+tout en observant le trafic généré avec des instances de \texttt{wireshark}
+tournant sur $m_{2}$ et $m_{4}$. 
+
+
+\section{Auto-configuration des adresses IPv6 globales et routage}
+
+Désactivez toutes les interfaces de toutes les machines pour recommencer
+l'exercice. Au lieu de configurer manuellement le réseau (ce qui était
+plutôt la norme en IPv4), nous allons profiter de l'\textbf{auto-configuration}
+(appelée ``sans état'', ce qui est plutôt la norme en IPv6). Configurez
+$Router$ de façon qu'il se comporte en routeur IPv6, c'est-à-dire
+de façon qu'il envoie sur les réseaux $2002\!::\!\!/64$ et $3003\!::\!\!/64$
+des messages ICMPv6 de type RA (Router Advertisement) et qu'il réponde
+aux messages ICMPv6 de type RS (Router Solicitation). Les routeurs
+sont normalement pré-équipés pour cela. Dans notre cas, s'agissant
+d'une machine GNU/Linux, il faudra configurer le service appelé \texttt{radvd}
+(Router Advertisement Demon). Voici un exemple de fichier de configuration
+\texttt{/etc/radvd.conf} que vous devrez adapter :
+\begin{lyxcode}
+interface~eth0~\{~
+
+~~~~~~~~AdvSendAdvert~on;
+
+~~~~~~~~MinRtrAdvInterval~3;~
+
+~~~~~~~~MaxRtrAdvInterval~10;
+
+~~~~~~~~prefix~3ffe:ffff:0100:f101::/64~\{~
+
+~~~~~~~~~~~~~~~~AdvOnLink~on;~
+
+~~~~~~~~~~~~~~~~AdvAutonomous~on;~
+
+~~~~~~~~~~~~~~~~AdvRouterAddr~on;~
+
+~~~~~~~~\};
+
+\};
+
+
+\end{lyxcode}
+Une fois le service en marche, réactivez tout simplement les interfaces
+de toutes les autres machines. La configuration devrait donc se passer
+de façon automatique et transparente, d'une manière assez similaire
+à DHCP en IPv4 (mais aucun état, ou ``bail'', est sauvegardé). Une
+fois les interfaces réactivées, testez une fois de plus les connexions
+avec \texttt{ping6} et \texttt{ssh}, dans chacun des réseaux et entre
+les deux (routage), tout en observant le trafic généré avec des instances
+de \texttt{wireshark} tournant sur $m_{2}$ et $m_{4}$. 
+
+
+\section{Annexe}
+\begin{lyxcode}
+\$~nmap~-6~-sT~::1~~~~~~~~~~~~~~~~~~~~\#~détecte~les~ports~TCP/IPv6~ouverts~sur~la~machine\end{lyxcode}
+
+\end{document}

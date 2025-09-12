@@ -1,0 +1,182 @@
+%% LyX 2.0.2 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[french]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=1.5cm,bmargin=1.5cm,lmargin=1.8cm,rmargin=1.8cm}
+\usepackage{graphicx}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+\newenvironment{lyxcode}
+{\par\begin{list}{}{
+\setlength{\rightmargin}{\leftmargin}
+\setlength{\listparindent}{0pt}% needed for AMS classes
+\raggedright
+\setlength{\itemsep}{0pt}
+\setlength{\parsep}{0pt}
+\normalfont\ttfamily}%
+ \item[]}
+{\end{list}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\date{}
+
+\makeatother
+
+\usepackage{babel}
+\addto\extrasfrench{%
+   \providecommand{\og}{\leavevmode\flqq~}%
+   \providecommand{\fg}{\ifdim\lastskip>\z@\unskip\fi~\frqq}%
+}
+
+\begin{document}
+
+\title{Travaux Pratiques\\
+Filtrage et NAT : scripts de contrôle}
+
+
+\author{Copyright (C) 2012~~Jean-Vincent Loddo\\
+{\normalsize Licence Creative Commons Paternité - Partage à l'Identique
+3.0 non transposé.}}
+
+\maketitle
+Séance de TP entièrement effectuée avec le logiciel Marionnet. Durée
+estimée~: 2h - 2h30.
+
+
+\paragraph*{Prérequis. }
+
+Notions de routage, filtrage et NAT (SNAT et DNAT) et leur interdépendance.
+Savoir écrire de simples scripts shell.
+
+
+\section*{Câblage et configuration du réseau local}
+
+Deux machines, $m_{1}$ et $m_{2}$ et un concentrateur $H_{1}$ réalisent
+un réseau local $LAN_{1}=\{m_{1},m_{2}\}$ en $192.168.1.0/24$. Deux
+autres machines $m_{3}$ et $m_{4}$ et un concentrateur $H_{2}$
+réalisent un réseau local $LAN_{2}=\{m_{3},m_{4}\}$ en $10.0.0.0/8$.
+Un troisième réseau $CAN_{1}$ (Campus Area Network) sera constitué
+d'une machine appelée $intrus$ et d'une partie indéfinie (de niveau
+2) représentée par le composant marionnet ``nuage''. Une machine
+faisant office de routeur assurera la laison (de niveau $3$) entre
+$LAN_{1}$ (port $0$), $LAN_{2}$ (port $1$) et $CAN_{1}$ (port
+$2$).
+
+
+\paragraph{Distributions GNU/Linux.}
+
+Utilisez n'importe quelle distribution~: il suffira de pouvoir lancer
+les commandes basiques de configuration et observation du réseau (\texttt{ifconfig},
+\texttt{route}, \texttt{tcpdump}, ...)
+
+\begin{center}
+\includegraphics[scale=0.45]{images/plan_avec_machine_routeur_firewall}
+\par\end{center}
+
+
+\paragraph{Attribution des IP.}
+
+Par simplicité, la machine $m_{i}$ aura l'adresse $192.168.1.i$
+ou $10.0.0.i$ selon le réseau d'appartenance. Le routeur $routeur\_firewall$
+doit avoir son port $0$ branché au $LAN_{1}$ et configuré en $192.168.1.254$.
+Concernant le réseau $CAN_{1}$, la machine $intrus$ prendra le $145.12.0.42$,
+et le routeur prendra le $145.12.0.53$ sur le port $2$ (\texttt{eth2}).
+
+
+\part{Routage et lancement des services}
+
+Configurer le routage sur la machine $routeur\_firewall$ et définissez-la
+comme passerelle pour toutes les autres machines du réseaux. Testez
+avec la commande \texttt{ping} que toutes les machines puissent communiquer
+avec toutes les autres. 
+
+
+\subsubsection*{Services à activer~:}
+\begin{itemize}
+\item $intrus$ offre un service HTTP
+\item $m_{1}$ offre un service HTTP 
+\item $m_{3}$ offre un service de connexion à distance sécurisé SSH
+\end{itemize}
+
+\part{Filtrage, SNAT et DNAT par script}
+
+Le but de cette partie est d'écrire un script sur $routeur\_firewall$
+de façon à obtenir le comportement qui est habituellement désiré~:\medskip{}
+
+\begin{enumerate}
+\item $routeur\_firewall$ doit prêter son identité publique aux machines
+des réseaux privés, lorsque ces dernières ``sortent'' sur le réseau
+publique (SNAT, action \texttt{MASQUERADE})\medskip{}
+
+\item l'\texttt{extérieur}, dont $intrus$, ne peut avoir accès, par son
+\textbf{initiative}, aux réseaux privés; l'extérieur peut juste \textbf{répondre}
+aux initiatives (filtrage, chaîne \texttt{FORWARD}, module \texttt{state})\medskip{}
+
+\item le machines du réseaux privés, à l'occurrence $m_{1}$ et $m_{3}$,
+doivent pouvoir offrir des services à l'extérieur, sans que l'extérieur
+en suppose l'existence; $routeur\_firewall$ ``fera semblant ``
+d'offrir ces services à l'extérieur (DNAT).\medskip{}
+
+\end{enumerate}
+Écrire donc un scripts \texttt{bash} commençant par~:
+\begin{lyxcode}
+\#!/bin/bash
+
+
+
+EXTIF=eth2~~~~\#~external~interface
+\end{lyxcode}
+et contenant les fonctions suivantes~:
+\begin{lyxcode}
+function~fw\_start~\{~..~\}
+
+function~fw\_stop~~\{~..~\}
+
+function~fw\_open\_port~~\{~..~\}
+
+function~fw\_close\_port~\{~..~\}\end{lyxcode}
+\begin{itemize}
+\item La fonction \texttt{fw\_start} s'occupe des points 1. et 2. ci-dessus,
+c'est-à-dire elle s'occupe d'activer le filtrage de base (pas d'initiatives
+de l'extérieur) et le masquerading. Elle opère à la fois sur la chaîne
+\texttt{FORWARD} et sur la chaîne \texttt{INPUT}. \medskip{}
+
+\item La fonction fw\_\texttt{stop} remet toutes les chaînes manipulées
+dans leurs états initiaux.\medskip{}
+
+\item La fonction \texttt{fw\_open\_port} ouvre un port d'un protocole donné;
+pour ce faire elle utilise au moins 2 arguments : le protocole (\texttt{\$1})
+et le port (\texttt{\$2}) à ouvrir; si on ne lui donne pas d'autres
+arguments, elle ouvre ce port en opérant sur la chaîne \texttt{INPUT};
+si on lui donne un troisième argument, qui est une adresse IP (\texttt{\$3}),
+elle ouvre ce port en opérant sur la chaîne \texttt{FORWARD} et s'occupe
+de rediriger (DNAT) vers \texttt{\$3}; un quatrième argument (\texttt{\$4})
+optionnel précisera éventuellement le port de redirection. Exemples
+d'utilisation~:
+
+\begin{lyxcode}
+fw\_open\_port~tcp~53
+
+fw\_open\_port~tcp~80~192.168.1.1
+
+fw\_open\_port~tcp~22~10.0.0.1
+
+fw\_open\_port~tcp~22~10.0.0.1~50022
+\end{lyxcode}
+\item La fonction \texttt{fw\_close\_port} fera le travail inverse de \texttt{fw\_open\_port},
+c'est-à-dire qu'elle éliminera les règles introduites avec \texttt{fw\_open\_port};
+elle aura donc elle aussi 2 arguments obligatoires et 2 autres optionnels.
+Exemples d'utilisation~:
+
+\begin{lyxcode}
+fw\_close\_port~tcp~53
+
+fw\_close\_port~tcp~22~10.0.0.1~50022
+\end{lyxcode}
+\end{itemize}
+Complétez le script pour configurer $routeur\_firewall$ et vérifiez
+le résultat de votre configuration avec \texttt{tcpdump} ou \texttt{wireshark}.
+\end{document}

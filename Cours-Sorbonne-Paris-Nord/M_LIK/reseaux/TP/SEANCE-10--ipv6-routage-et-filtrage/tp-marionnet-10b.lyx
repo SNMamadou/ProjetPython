@@ -1,0 +1,522 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+% Added by lyx2lyx
+%  for proper underlining
+\PassOptionsToPackage{normalem}{ulem}
+\usepackage{ulem}
+\let\cite@rig\cite
+\newcommand{\b@xcite}[2][\%]{\def\def@pt{\%}\def\pas@pt{#1}
+  \mbox{\ifx\def@pt\pas@pt\cite@rig{#2}\else\cite@rig[#1]{#2}\fi}}
+\renewcommand{\underbar}[1]{{\let\cite\b@xcite\uline{#1}}}
+\date{}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Travaux Pratiques
+\begin_inset Newline newline
+\end_inset
+
+Initiation IPv6
+\begin_inset Newline newline
+\end_inset
+
+Auto-configuration, Routage et 
+\series bold
+Filtrage
+\end_layout
+
+\begin_layout Author
+Copyright (C) 2019
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Jean-Vincent Loddo
+\begin_inset Newline newline
+\end_inset
+
+
+\size normal
+Licence Creative Commons Paternité - Partage à l'Identique 3.0 non transposé.
+\end_layout
+
+\begin_layout Standard
+Séance de TP entièrement effectuée avec le logiciel Marionnet.
+ Durée estimée
+\begin_inset space ~
+\end_inset
+
+: 1h30.- 2h
+\end_layout
+
+\begin_layout Paragraph*
+Prérequis.
+ 
+\end_layout
+
+\begin_layout Standard
+Initiation à IPv6 (format, adresses, quelques éléments de ICMPv6, commande
+ 
+\family typewriter
+ip
+\family default
+).
+\end_layout
+
+\begin_layout Section
+Câblage et configuration des réseaux lien-local (locaux, privés)
+\end_layout
+
+\begin_layout Standard
+On utilise 
+\begin_inset Formula $6$
+\end_inset
+
+ machines, 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+, 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+, 
+\begin_inset Formula $Router$
+\end_inset
+
+, 
+\begin_inset Formula $m_{3}$
+\end_inset
+
+, 
+\begin_inset Formula $m_{4}$
+\end_inset
+
+ et 
+\begin_inset Formula $intrus$
+\end_inset
+
+, dont une en particulier, 
+\begin_inset Formula $Router$
+\end_inset
+
+, équipée de 
+\begin_inset Formula $2$
+\end_inset
+
+ interfaces réseau 
+\begin_inset Formula $eth0$
+\end_inset
+
+ et 
+\begin_inset Formula $eth1$
+\end_inset
+
+.
+ Utilisez la distribution Debian 
+\emph on
+wheezy
+\emph default
+ sur toutes les machines.
+ Les deux réseaux locaux 
+\begin_inset Formula $LAN_{1}=\{m_{1},m_{2},Router[0]\}$
+\end_inset
+
+ et 
+\begin_inset Formula $LAN_{2}=\{Router[1],m_{3},m_{4}\}$
+\end_inset
+
+ seront réalisés par des hubs (de façon à pouvoir observer facilement le
+ trafic).
+ Déclenchez l'auto-configuration des adresses lien-local de façon à pouvoir
+ communiquer entre les machines des deux réseaux (sans routage évidemment,
+ qui n'a pas de sens pour les adresses lien-local).
+ Testez les connexions avec 
+\family typewriter
+ping6
+\family default
+ et 
+\family typewriter
+ssh
+\family default
+ tout en observant le trafic généré avec des instances de 
+\family typewriter
+wireshark
+\family default
+ tournant sur 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+ et 
+\begin_inset Formula $m_{4}$
+\end_inset
+
+.
+ 
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/projet-marionnet.png
+	lyxscale 150
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Rappel syntaxe commande 
+\family typewriter
+ip
+\family default
+ sous Linux (par l'exemple)
+\end_layout
+
+\begin_layout Subsubsection*
+Activer/désactiver une interface
+\end_layout
+
+\begin_layout LyX-Code
+ip link set dev eth0 up                            # équivalent à "ifconfig
+ eth0 up"
+\end_layout
+
+\begin_layout LyX-Code
+ip link set dev eth0 down                          # juste "down" à la place
+ de "up"
+\end_layout
+
+\begin_layout Subsubsection*
+Afficher l'état d'une interface
+\end_layout
+
+\begin_layout LyX-Code
+ip -6 addr show dev eth0
+\end_layout
+
+\begin_layout Subsubsection*
+Ajouter/éliminer une adresse IPv6
+\end_layout
+
+\begin_layout LyX-Code
+ip -6 addr add 2001:0db8:0:f101::1/64 dev eth0
+\end_layout
+
+\begin_layout LyX-Code
+ip -6 addr del 2001:0db8:0:f101::1/64 dev eth0     # juste "del" à la place
+ de "add"
+\end_layout
+
+\begin_layout Subsubsection*
+Afficher le voisinage IPv6 (correspondant de ARP)
+\end_layout
+
+\begin_layout LyX-Code
+ip -6 neigh show
+\end_layout
+
+\begin_layout Subsubsection*
+Afficher les routes IPv6
+\end_layout
+
+\begin_layout LyX-Code
+ip -6 route show
+\end_layout
+
+\begin_layout Subsubsection*
+Ajouter/éliminer une route IPv6
+\end_layout
+
+\begin_layout LyX-Code
+ip -6 route add default via 2001:0db8:0:f101::1    # NETWORK/LEN (CIDR)
+ au lieu de "default"
+\end_layout
+
+\begin_layout LyX-Code
+ip -6 route del default via 2001:0db8:0:f101::1    # juste "del" à la place
+ de "add"
+\end_layout
+
+\begin_layout Subsubsection*
+Activer le routage IPv6 du noyau Linux
+\end_layout
+
+\begin_layout LyX-Code
+echo 1 >/proc/sys/net/ipv6/conf/all/forwarding
+\end_layout
+
+\begin_layout Section
+Auto-configuration des adresses IPv6 globales et routage
+\end_layout
+
+\begin_layout Standard
+Configurez 
+\begin_inset Formula $Router$
+\end_inset
+
+ de façon qu'il se comporte en routeur IPv6, c'est-à-dire de façon qu'il
+ envoie sur les réseaux 
+\begin_inset Formula $2001\!::\!\!/64$
+\end_inset
+
+ et 
+\begin_inset Formula $2002\!::\!\!/64$
+\end_inset
+
+ des messages ICMPv6 de type RA (Router Advertisement) et qu'il réponde
+ aux messages ICMPv6 de type RS (Router Solicitation).
+ Les routeurs sont normalement pré-équipés pour cela.
+ Dans notre cas, s'agissant d'une machine GNU/Linux, il faudra configurer
+ le service appelé 
+\family typewriter
+radvd
+\family default
+ (Router Advertisement Demon).
+ Voici un exemple de fichier de configuration 
+\family typewriter
+/etc/radvd.conf
+\family default
+ que vous devrez adapter :
+\end_layout
+
+\begin_layout LyX-Code
+interface eth0 { 
+\end_layout
+
+\begin_layout LyX-Code
+        AdvSendAdvert on;
+\end_layout
+
+\begin_layout LyX-Code
+        MinRtrAdvInterval 3; 
+\end_layout
+
+\begin_layout LyX-Code
+        MaxRtrAdvInterval 10;
+\end_layout
+
+\begin_layout LyX-Code
+        prefix 3ffe:ffff:0100:f101::/64 { 
+\end_layout
+
+\begin_layout LyX-Code
+                AdvOnLink on; 
+\end_layout
+
+\begin_layout LyX-Code
+                AdvAutonomous on; 
+\end_layout
+
+\begin_layout LyX-Code
+                AdvRouterAddr on; 
+\end_layout
+
+\begin_layout LyX-Code
+        };
+\end_layout
+
+\begin_layout LyX-Code
+};
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Standard
+Une fois le service en marche, réactivez tout simplement les interfaces
+ de toutes les autres machines.
+ La configuration devrait donc se passer de façon automatique et transparente,
+ d'une manière assez similaire à DHCP en IPv4 (mais aucun état, ou 
+\begin_inset Quotes eld
+\end_inset
+
+bail
+\begin_inset Quotes erd
+\end_inset
+
+, est sauvegardé).
+ Une fois les interfaces réactivées, testez une fois de plus les connexions
+ avec 
+\family typewriter
+ping6
+\family default
+ et 
+\family typewriter
+ssh
+\family default
+, dans chacun des réseaux et entre les deux (routage), tout en observant
+ le trafic généré avec des instances de 
+\family typewriter
+wireshark
+\family default
+ tournant sur 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+ et 
+\begin_inset Formula $m_{4}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Section
+Filtrage IPv6
+\end_layout
+
+\begin_layout Standard
+Activez le service de connexion à distance sécurisées (
+\family typewriter
+ssh
+\family default
+) sur toutes le machines ordinaires 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+, 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+, 
+\begin_inset Formula $m_{3}$
+\end_inset
+
+, 
+\begin_inset Formula $m_{4}$
+\end_inset
+
+.
+ Toute machine faisant partie de 
+\begin_inset Formula $LAN_{1}$
+\end_inset
+
+ ou 
+\begin_inset Formula $LAN_{2}$
+\end_inset
+
+ pourra se connecter à distance sur toute autre machine de ces deux réseaux
+ locaux.
+ Cependant, 
+\begin_inset Formula $intrus$
+\end_inset
+
+ 
+\bar under
+pourra se connecter seulement sur
+\bar default
+ 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+, en spécifiant son adresse globale, pas sur les autres.
+ En utilisant 
+\family typewriter
+ip6tables
+\family default
+, prévoir donc sur 
+\begin_inset Formula $routeur$
+\end_inset
+
+ des règles de filtrage interdisant tout autre accès aux machines des réseaux
+ locaux de la part de l'extérieur (c'est-à-dire, dans notre cas, 
+\begin_inset Formula $intrus$
+\end_inset
+
+).
+\end_layout
+
+\end_body
+\end_document

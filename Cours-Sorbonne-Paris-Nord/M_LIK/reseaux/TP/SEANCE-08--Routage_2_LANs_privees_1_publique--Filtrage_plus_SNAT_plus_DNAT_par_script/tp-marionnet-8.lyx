@@ -1,0 +1,663 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\date{}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.8cm
+\topmargin 1.5cm
+\rightmargin 1.8cm
+\bottommargin 1.5cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Travaux Pratiques
+\begin_inset Newline newline
+\end_inset
+
+Filtrage et NAT : scripts de contrôle
+\end_layout
+
+\begin_layout Author
+Copyright (C) 2012
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Jean-Vincent Loddo
+\begin_inset Newline newline
+\end_inset
+
+
+\size normal
+Licence Creative Commons Paternité - Partage à l'Identique 3.0 non transposé.
+\end_layout
+
+\begin_layout Standard
+Séance de TP entièrement effectuée avec le logiciel Marionnet.
+ Durée estimée
+\begin_inset space ~
+\end_inset
+
+: 2h - 2h30.
+\end_layout
+
+\begin_layout Paragraph*
+Prérequis.
+ 
+\end_layout
+
+\begin_layout Standard
+Notions de routage, filtrage et NAT (SNAT et DNAT) et leur interdépendance.
+ Savoir écrire de simples scripts shell.
+\end_layout
+
+\begin_layout Section*
+Câblage et configuration du réseau local
+\end_layout
+
+\begin_layout Standard
+Deux machines, 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+ et 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+ et un concentrateur 
+\begin_inset Formula $H_{1}$
+\end_inset
+
+ réalisent un réseau local 
+\begin_inset Formula $LAN_{1}=\{m_{1},m_{2}\}$
+\end_inset
+
+ en 
+\begin_inset Formula $192.168.1.0/24$
+\end_inset
+
+.
+ Deux autres machines 
+\begin_inset Formula $m_{3}$
+\end_inset
+
+ et 
+\begin_inset Formula $m_{4}$
+\end_inset
+
+ et un concentrateur 
+\begin_inset Formula $H_{2}$
+\end_inset
+
+ réalisent un réseau local 
+\begin_inset Formula $LAN_{2}=\{m_{3},m_{4}\}$
+\end_inset
+
+ en 
+\begin_inset Formula $10.0.0.0/8$
+\end_inset
+
+.
+ Un troisième réseau 
+\begin_inset Formula $CAN_{1}$
+\end_inset
+
+ (Campus Area Network) sera constitué d'une machine appelée 
+\begin_inset Formula $intrus$
+\end_inset
+
+ et d'une partie indéfinie (de niveau 2) représentée par le composant marionnet
+ 
+\begin_inset Quotes eld
+\end_inset
+
+nuage
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Une machine faisant office de routeur assurera la laison (de niveau 
+\begin_inset Formula $3$
+\end_inset
+
+) entre 
+\begin_inset Formula $LAN_{1}$
+\end_inset
+
+ (port 
+\begin_inset Formula $0$
+\end_inset
+
+), 
+\begin_inset Formula $LAN_{2}$
+\end_inset
+
+ (port 
+\begin_inset Formula $1$
+\end_inset
+
+) et 
+\begin_inset Formula $CAN_{1}$
+\end_inset
+
+ (port 
+\begin_inset Formula $2$
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Paragraph
+Distributions GNU/Linux.
+\end_layout
+
+\begin_layout Standard
+Utilisez n'importe quelle distribution
+\begin_inset space ~
+\end_inset
+
+: il suffira de pouvoir lancer les commandes basiques de configuration et
+ observation du réseau (
+\family typewriter
+ifconfig
+\family default
+, 
+\family typewriter
+route
+\family default
+, 
+\family typewriter
+tcpdump
+\family default
+, ...)
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/plan_avec_machine_routeur_firewall.png
+	scale 45
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Attribution des IP.
+\end_layout
+
+\begin_layout Standard
+Par simplicité, la machine 
+\begin_inset Formula $m_{i}$
+\end_inset
+
+ aura l'adresse 
+\begin_inset Formula $192.168.1.i$
+\end_inset
+
+ ou 
+\begin_inset Formula $10.0.0.i$
+\end_inset
+
+ selon le réseau d'appartenance.
+ Le routeur 
+\begin_inset Formula $routeur\_firewall$
+\end_inset
+
+ doit avoir son port 
+\begin_inset Formula $0$
+\end_inset
+
+ branché au 
+\begin_inset Formula $LAN_{1}$
+\end_inset
+
+ et configuré en 
+\begin_inset Formula $192.168.1.254$
+\end_inset
+
+.
+ Concernant le réseau 
+\begin_inset Formula $CAN_{1}$
+\end_inset
+
+, la machine 
+\begin_inset Formula $intrus$
+\end_inset
+
+ prendra le 
+\begin_inset Formula $145.12.0.42$
+\end_inset
+
+, et le routeur prendra le 
+\begin_inset Formula $145.12.0.53$
+\end_inset
+
+ sur le port 
+\begin_inset Formula $2$
+\end_inset
+
+ (
+\family typewriter
+eth2
+\family default
+).
+\end_layout
+
+\begin_layout Part
+Routage et lancement des services
+\end_layout
+
+\begin_layout Standard
+Configurer le routage sur la machine 
+\begin_inset Formula $routeur\_firewall$
+\end_inset
+
+ et définissez-la comme passerelle pour toutes les autres machines du réseaux.
+ Testez avec la commande 
+\family typewriter
+ping
+\family default
+ que toutes les machines puissent communiquer avec toutes les autres.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+
+\series bold
+Services à activer
+\series default
+
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $intrus$
+\end_inset
+
+ offre un service HTTP
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $m_{1}$
+\end_inset
+
+ offre un service HTTP 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $m_{3}$
+\end_inset
+
+ offre un service de connexion à distance sécurisé SSH
+\end_layout
+
+\begin_layout Part
+Filtrage, SNAT et DNAT par script
+\end_layout
+
+\begin_layout Standard
+Le but de cette partie est d'écrire un script sur 
+\begin_inset Formula $routeur\_firewall$
+\end_inset
+
+ de façon à obtenir le comportement qui est habituellement désiré
+\begin_inset space ~
+\end_inset
+
+:
+\begin_inset VSpace medskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $routeur\_firewall$
+\end_inset
+
+ doit prêter son identité publique aux machines des réseaux privés, lorsque
+ ces dernières 
+\begin_inset Quotes eld
+\end_inset
+
+sortent
+\begin_inset Quotes erd
+\end_inset
+
+ sur le réseau publique (SNAT, action 
+\family typewriter
+MASQUERADE
+\family default
+)
+\begin_inset VSpace medskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+l'
+\family typewriter
+extérieur
+\family default
+, dont 
+\begin_inset Formula $intrus$
+\end_inset
+
+, ne peut avoir accès, par son 
+\series bold
+initiative
+\series default
+, aux réseaux privés; l'extérieur peut juste 
+\series bold
+répondre
+\series default
+ aux initiatives (filtrage, chaîne 
+\family typewriter
+FORWARD
+\family default
+, module 
+\family typewriter
+state
+\family default
+)
+\begin_inset VSpace medskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+le machines du réseaux privés, à l'occurrence 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+ et 
+\begin_inset Formula $m_{3}$
+\end_inset
+
+, doivent pouvoir offrir des services à l'extérieur, sans que l'extérieur
+ en suppose l'existence; 
+\begin_inset Formula $routeur\_firewall$
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+fera semblant 
+\begin_inset Quotes eld
+\end_inset
+
+ d'offrir ces services à l'extérieur (DNAT).
+\begin_inset VSpace medskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Écrire donc un scripts 
+\family typewriter
+bash
+\family default
+ commençant par
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_layout LyX-Code
+#!/bin/bash
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+EXTIF=eth2    # external interface
+\end_layout
+
+\begin_layout Standard
+et contenant les fonctions suivantes
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_layout LyX-Code
+function fw_start { ..
+ }
+\end_layout
+
+\begin_layout LyX-Code
+function fw_stop  { ..
+ }
+\end_layout
+
+\begin_layout LyX-Code
+function fw_open_port  { ..
+ }
+\end_layout
+
+\begin_layout LyX-Code
+function fw_close_port { ..
+ }
+\end_layout
+
+\begin_layout Itemize
+La fonction 
+\family typewriter
+fw_start
+\family default
+ s'occupe des points 1.
+ et 2.
+ ci-dessus, c'est-à-dire elle s'occupe d'activer le filtrage de base (pas
+ d'initiatives de l'extérieur) et le masquerading.
+ Elle opère à la fois sur la chaîne 
+\family typewriter
+FORWARD
+\family default
+ et sur la chaîne 
+\family typewriter
+INPUT
+\family default
+.
+ 
+\begin_inset VSpace medskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+La fonction fw_
+\family typewriter
+stop
+\family default
+ remet toutes les chaînes manipulées dans leurs états initiaux.
+\begin_inset VSpace medskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+La fonction 
+\family typewriter
+fw_open_port
+\family default
+ ouvre un port d'un protocole donné; pour ce faire elle utilise au moins
+ 2 arguments : le protocole (
+\family typewriter
+$1
+\family default
+) et le port (
+\family typewriter
+$2
+\family default
+) à ouvrir; si on ne lui donne pas d'autres arguments, elle ouvre ce port
+ en opérant sur la chaîne 
+\family typewriter
+INPUT
+\family default
+; si on lui donne un troisième argument, qui est une adresse IP (
+\family typewriter
+$3
+\family default
+), elle ouvre ce port en opérant sur la chaîne 
+\family typewriter
+FORWARD
+\family default
+ et s'occupe de rediriger (DNAT) vers 
+\family typewriter
+$3
+\family default
+; un quatrième argument (
+\family typewriter
+$4
+\family default
+) optionnel précisera éventuellement le port de redirection.
+ Exemples d'utilisation
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+fw_open_port tcp 53
+\end_layout
+
+\begin_layout LyX-Code
+fw_open_port tcp 80 192.168.1.1
+\end_layout
+
+\begin_layout LyX-Code
+fw_open_port tcp 22 10.0.0.1
+\end_layout
+
+\begin_layout LyX-Code
+fw_open_port tcp 22 10.0.0.1 50022
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+La fonction 
+\family typewriter
+fw_close_port
+\family default
+ fera le travail inverse de 
+\family typewriter
+fw_open_port
+\family default
+, c'est-à-dire qu'elle éliminera les règles introduites avec 
+\family typewriter
+fw_open_port
+\family default
+; elle aura donc elle aussi 2 arguments obligatoires et 2 autres optionnels.
+ Exemples d'utilisation
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+fw_close_port tcp 53
+\end_layout
+
+\begin_layout LyX-Code
+fw_close_port tcp 22 10.0.0.1 50022
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+Complétez le script pour configurer 
+\begin_inset Formula $routeur\_firewall$
+\end_inset
+
+ et vérifiez le résultat de votre configuration avec 
+\family typewriter
+tcpdump
+\family default
+ ou 
+\family typewriter
+wireshark
+\family default
+.
+\end_layout
+
+\end_body
+\end_document

@@ -1,0 +1,169 @@
+%% LyX 2.0.8.1 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[french]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm}
+\usepackage{graphicx}
+\PassOptionsToPackage{normalem}{ulem}
+\usepackage{ulem}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+\newenvironment{lyxcode}
+{\par\begin{list}{}{
+\setlength{\rightmargin}{\leftmargin}
+\setlength{\listparindent}{0pt}% needed for AMS classes
+\raggedright
+\setlength{\itemsep}{0pt}
+\setlength{\parsep}{0pt}
+\normalfont\ttfamily}%
+ \item[]}
+{\end{list}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\date{}
+
+\makeatother
+
+\usepackage{babel}
+\makeatletter
+\addto\extrasfrench{%
+   \providecommand{\og}{\leavevmode\flqq~}%
+   \providecommand{\fg}{\ifdim\lastskip>\z@\unskip\fi~\frqq}%
+}
+
+\makeatother
+\begin{document}
+
+\title{Travaux Pratiques\\
+Routage, filtrage (pare-feu) et NAT}
+
+
+\author{Copyright (C) 2012-2015~~Jean-Vincent Loddo\\
+{\normalsize{}Licence Creative Commons Paternité - Partage à l'Identique
+3.0 non transposé.}}
+
+\maketitle
+Séance de TP entièrement effectuée avec le logiciel Marionnet. Durée
+estimée~: 2h - 2h30.
+
+
+\paragraph*{Prérequis. }
+
+Notions de routage, filtrage et NAT (SNAT et DNAT) et leur interdépendance.
+
+
+\section*{Câblage et configuration du réseau local}
+
+Deux machines, $m_{1}$ et $m_{2}$ et un concentrateur $H_{1}$ réalisent
+un réseau local $LAN_{1}=\{m_{1},m_{2}\}$ en $192.168.1.0/24$. Deux
+autres machines $m_{3}$ et $m_{4}$ et un concentrateur $H_{2}$
+réalisent un réseau local $LAN_{2}=\{m_{3},m_{4}\}$ en $10.0.0.0/8$.
+Un troisième réseau $CAN_{1}$ (Campus Area Network) sera constitué
+d'une machine appelée $intrus$ et d'une partie indéfinie (de niveau
+2) représentée par le composant marionnet ``nuage''. Une machine
+faisant office de routeur assurera la laison (de niveau $3$) entre
+$LAN_{1}$ (port $0$), $LAN_{2}$ (port $1$) et $CAN_{1}$ (port
+$2$).
+
+
+\paragraph{Distributions GNU/Linux.}
+
+Utilisez n'importe quelle distribution~: il suffira de pouvoir lancer
+les commandes basiques de configuration et observation du réseau (\texttt{ifconfig},
+\texttt{route}, \texttt{tcpdump}, ...)
+
+\begin{center}
+\includegraphics[scale=0.5]{images/plan_avec_machine_routeur_firewall}
+\par\end{center}
+
+
+\paragraph{Attribution des IP.}
+
+Par simplicité, la machine $m_{i}$ aura l'adresse $192.168.1.i$
+ou $10.0.0.i$ selon le réseau d'appartenance. Le routeur $routeur$
+doit avoir son port $0$ branché au $LAN_{1}$ et configuré en $192.168.1.254$.
+Concernant le réseau $CAN_{1}$ ($145.12.0.0/16$), la machine $intrus$
+prendra le $145.12.0.42$, et le routeur prendra le $145.12.0.53$
+sur le port $2$ (\texttt{eth2}).
+
+
+\part{Routage}
+
+Configurer le routage sur la machine $routeur$ et définissez-la comme
+passerelle pour toutes les autres machines du réseaux. Testez avec
+la commande \texttt{ping} que toutes les machines puissent communiquer
+avec toutes les autres.
+
+
+\paragraph{Test et remarques~:}
+
+observez que la machine $intrus$ reçoit (et répond) aux ping (ECHO
+REQUEST/REPLY du protocole ICMP) des machines du $LAN_{1}$ et du
+$LAN_{2}$, même si elles appartiennent à un réseau à priori \textbf{privé}~:
+\begin{lyxcode}
+m1\#~ping~145.12.0.42
+
+intrus\#~tcpdump~-i~eth0
+\end{lyxcode}
+Cette situation \uline{n'est pas souhaitable} pour plusieurs raisons~:
+\begin{enumerate}
+\item $intrus$ a défini $145.12.0.53$ comme passerelle par défaut, ce
+qui est \emph{abusif} : il devrait ignorer l'existence des réseaux
+privés~; ces derniers devraient, dans l'idéal, être \emph{cachés}
+derrière le routeur~; 
+\item $intrus$ peut lui même pinguer les réseaux privés, ce qui veut dire
+que $routeur$ \uline{laisse passer toutes les trames} (\emph{pas
+de filtrage}), même celles qui correspondent à des \emph{initiatives}
+de l'extérieur vers les réseaux privés (et dans ce contexte, \emph{initiative}
+peut vouloir dire \emph{attaque})~;
+\item lorsque l'initiative est prise par l'intérieur, comme dans le cas
+d'un ping depuis $LAN_{1}$ ou $LAN_{2}$ vers $intrus$, la machine
+$routeur$ \uline{laisse passer les paquets IP sans les changer}
+(\emph{pas de NAT}) et $intrus$ constate donc la réception de messages
+provenant d'adresse telles que $192.168.1.0/24$ ou $10.0.0.8$~;
+s'il ne le sait pas déjà, il peut donc imaginer pouvoir utiliser $routeur$
+pour atteindre ces adresses. Autrement dit, s'il l'ignorait auparavant,
+il n'ignorera plus l'existence de ces réseaux, ce qui nous ramène
+au problème soulevé au point $1$.
+\end{enumerate}
+Il faut donc configurer le filtrage et la traduction d'adresses pour
+\textbf{protéger} et \textbf{cacher} la structure interne du réseau
+privé aux yeux de l'extérieur.
+
+
+\part{Filtrage et SNAT}
+
+Supposons que la machine $intrus$ offre un service HTTP; lancez donc
+une serveur http sur cette machine. Configurer le filtrage sur la
+machine $routeur$ de façon qu'elle protège l'ensemble des réseaux
+privés $LAN_{1}$ et $LAN_{2}$, c'est-à-dire de façon que~:
+\begin{description}
+\item [{(a)}] $intrus$ ne pourra pas avoir accès à ces réseaux privés
+\item [{(b)}] toutes les machines des réseaux privés auront accès au serveur
+web de $intrus$
+\item [{(c)}] $intrus$ aura toujours l'impression que les requêtes proviennent
+de $routeur$
+\item [{Suggestion~:}] pour obtenir (a) et (b) utiliser le module \texttt{state}
+de \texttt{iptables} pour définir des règles selon l'état \texttt{NEW},
+\texttt{ESTABLISHED} ou \texttt{RELATED} (cf. \texttt{man iptables});
+pour obtenir (c) utiliser une règle SNAT.
+\end{description}
+Vérifier le résultat de votre configuration avec \texttt{tcpdump}
+ou \texttt{wireshark}.
+
+
+\part{DNAT}
+
+Supposons à présent que la machine $m_{1}$ offre un service HTTP
+et que $m_{2}$ offre un service de connexion à distance SSH; lancez
+donc ces services. Ajouter une règle au pare-feu de façon que~:
+\begin{description}
+\item [{(d)}] $intrus$ pourra être client des services HTTP de $m_{1}$
+et SSH de $m_{2}$ \uline{mais} en ayant toujours l'impression
+que ces services soient rendus par $routeur$ qui, à ses yeux, sera
+donc son \uline{seul possible interlocuteur}.\end{description}
+
+\end{document}

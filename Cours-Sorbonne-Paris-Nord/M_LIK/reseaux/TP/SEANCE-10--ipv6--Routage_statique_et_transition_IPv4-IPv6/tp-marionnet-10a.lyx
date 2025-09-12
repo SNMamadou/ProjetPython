@@ -1,0 +1,631 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+% Added by lyx2lyx
+%  for proper underlining
+\PassOptionsToPackage{normalem}{ulem}
+\usepackage{ulem}
+\let\cite@rig\cite
+\newcommand{\b@xcite}[2][\%]{\def\def@pt{\%}\def\pas@pt{#1}
+  \mbox{\ifx\def@pt\pas@pt\cite@rig{#2}\else\cite@rig[#1]{#2}\fi}}
+\renewcommand{\underbar}[1]{{\let\cite\b@xcite\uline{#1}}}
+\date{}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 1.5cm
+\rightmargin 2cm
+\bottommargin 1.5cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Travaux Pratiques
+\begin_inset Newline newline
+\end_inset
+
+Routage statique IPv6 et
+\begin_inset Newline newline
+\end_inset
+
+transition IPv4 - IPv6 sous Unix avec 
+\family typewriter
+ipv6_care
+\end_layout
+
+\begin_layout Author
+Copyright (C) 2012
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Jean-Vincent Loddo
+\begin_inset Newline newline
+\end_inset
+
+
+\size normal
+Licence Creative Commons Paternité - Partage à l'Identique 3.0 non transposé.
+\end_layout
+
+\begin_layout Standard
+Séance de TP entièrement effectuée avec le logiciel Marionnet.
+ Durée estimée
+\begin_inset space ~
+\end_inset
+
+: 1h30 avec téléchargements et compilations, 1h sinon.
+\end_layout
+
+\begin_layout Paragraph*
+Prérequis.
+ 
+\end_layout
+
+\begin_layout Standard
+Format des paquets IPv6, double pile TCP/IP (sockets v4/v6).
+\end_layout
+
+\begin_layout Section
+Câblage et configuration des réseaux locaux
+\end_layout
+
+\begin_layout Standard
+On utilise 
+\begin_inset Formula $3$
+\end_inset
+
+ machines, 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+, 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+ et 
+\begin_inset Formula $m_{3}$
+\end_inset
+
+, dont une en particulier, 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+, équipée de 
+\begin_inset Formula $2$
+\end_inset
+
+ interfaces réseau 
+\begin_inset Formula $eth0$
+\end_inset
+
+ et 
+\begin_inset Formula $eth1$
+\end_inset
+
+.
+ Construisez un premier 
+\bar under
+réseau local
+\bar default
+ IPv4 
+\begin_inset Formula $LAN_{1}=\{m_{1},m_{2}[0]\}$
+\end_inset
+
+ en 
+\begin_inset Formula $10.0.2.0/24$
+\end_inset
+
+ en exploitant le service DHCP (v4) fourni par la passerelle internet 
+\begin_inset Formula $G_{1}$
+\end_inset
+
+.
+ Construisez de la même manière un deuxième 
+\bar under
+réseau local
+\bar default
+ IPv4 
+\begin_inset Formula $LAN_{2}=\{m_{2}[1],m_{3}\}$
+\end_inset
+
+ en 
+\begin_inset Formula $10.0.3.0/24$
+\end_inset
+
+, en exploitant le service DHCP (v4) fourni par la passerelle internet 
+\begin_inset Formula $G_{2}$
+\end_inset
+
+.
+ Dans la fenêtre de dialogue des passerelles, vous devez cocher l'option
+ 
+\begin_inset Quotes eld
+\end_inset
+
+service DHCP
+\begin_inset Quotes erd
+\end_inset
+
+ et préciser l'adresse réseau desservie.
+ 
+\end_layout
+
+\begin_layout Paragraph
+Distributions GNU/Linux.
+\end_layout
+
+\begin_layout Standard
+Utilisez la distribution Mandriva pour toutes les machines si vous voulez
+ télécharger et compiler les deux logiciels (
+\family typewriter
+ipv6_care
+\family default
+ et 
+\family typewriter
+nc6
+\family default
+).
+ Pour un TP à réaliser en 1 heure, préférez plutôt la distribution Debian
+ Wheezy qui contient déjà le logiciel 
+\family typewriter
+ipv6_care
+\family default
+, ce qui vous permettra d'éviter le téléchargement et la compilation de
+ ce dernier.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/tp-marionnet-9-plan.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Numéros IPv4 et routes.
+\end_layout
+
+\begin_layout Standard
+En lançant des clients dhcp sur les machines, et en définissant correctement
+ les tables de routage des machines, chaque machine devra être en mesure
+ à la fois (a) d'accéder à internet (en IPv4), et (b) de communiquer avec
+ le réseau local IPv4 d'à côté.
+\end_layout
+
+\begin_layout Section
+Installation des logiciels IPv6
+\end_layout
+
+\begin_layout Standard
+La configuration IPv4 de votre réseau étendu vous permet maintenant d'accéder
+ à Internet.
+ Pour la suite de cet exercice, si les adresses des logiciels indiquées
+ en argument des commandes 
+\family typewriter
+wget
+\family default
+ ne sont pas à jour, utilisez l'adresse mirroir sur le site 
+\family typewriter
+www.marionnet.org
+\family default
+ :
+\end_layout
+
+\begin_layout LyX-Code
+http://www.marionnet.org/download/contrib/mirror/
+\end_layout
+
+\begin_layout Standard
+qui contient toutes les archives nécessaires (vous pouvez retrouver les
+ noms précis avec un butineur, en navigant sur cette page).
+ Téléchargez, compilez et installez 
+\bar under
+sur toutes les machines
+\bar default
+ (en parallèle si possible) les deux logiciels utiles à la suite du TP,
+ par la séquence de commandes suivantes
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Subsection
+ipv6_care  
+\end_layout
+
+\begin_layout LyX-Code
+$ wget http://sourceforge.net/projects/ipv6-care/files/latest/download?source=fil
+es 
+\end_layout
+
+\begin_layout LyX-Code
+$ tar xvzf ipv6_care-*.tar.gz 
+\end_layout
+
+\begin_layout LyX-Code
+$ cd ipv6_care-* 
+\end_layout
+
+\begin_layout LyX-Code
+$ ./configure && make && make check && make install && echo OK
+\end_layout
+
+\begin_layout Subsection
+nc6  (netcat en version IPv6)
+\end_layout
+
+\begin_layout LyX-Code
+$ wget ftp://ftp.deepspace6.net/pub/ds6/sources/nc6/nc6-1.0.tar.bz2 
+\end_layout
+
+\begin_layout LyX-Code
+$ tar xvjf nc6-1.0.tar.bz2 
+\end_layout
+
+\begin_layout LyX-Code
+$ cd nc6-1.0 
+\end_layout
+
+\begin_layout LyX-Code
+$ ./configure && make && make install && echo OK
+\end_layout
+
+\begin_layout Section
+Configuration et routage statique IPv6
+\end_layout
+
+\begin_layout Standard
+Configurez le réseau 
+\begin_inset Formula $LAN_{1}$
+\end_inset
+
+ en 
+\family typewriter
+2001:db8::/32
+\family default
+ et le réseau 
+\begin_inset Formula $LAN_{2}$
+\end_inset
+
+ en 
+\family typewriter
+2001:db9::/32
+\family default
+ en assurant le routage IPv6 sur la machine 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+.
+ Utilisez la convention usuelle où 
+\begin_inset Formula $m_{i}$
+\end_inset
+
+ prend comme dernier octet de l'adresse la valeur 
+\begin_inset Formula $i$
+\end_inset
+
+ (par exemple 
+\begin_inset Formula $m_{3}$
+\end_inset
+
+ prendra 
+\family typewriter
+2001:db9::3/32
+\family default
+).
+ Testez la connectivité IPv6 avec 
+\family typewriter
+ping6
+\family default
+ entre machines du même réseau et machines de réseaux différents (
+\begin_inset Formula $m_{1}$
+\end_inset
+
+ et 
+\begin_inset Formula $m_{3}$
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Section
+Donner une compatibilité double pile à un service simple pile sous Unix
+ avec 
+\family typewriter
+ipv6_care
+\end_layout
+
+\begin_layout Subsection
+IPv4 only -> Double pile
+\end_layout
+
+\begin_layout Standard
+Lancer un serveur TCP/IPv4 avec 
+\family typewriter
+netcat
+\family default
+ sur 
+\begin_inset Formula $m_{3}$
+\end_inset
+
+.
+ Testez le bon fonctionnement de la connexion en IPv4 en lançant un client
+ 
+\family typewriter
+netcat
+\family default
+ sur 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+ sur un port quelconque (par exemple 80).
+ Testez à présent l'échec de connexion d'un client exclusivement TCP/IPv6
+ tournant sur 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_layout LyX-Code
+m1# nc6 -6 ADRESSE_IPV6 PORT      # échec!
+\end_layout
+
+\begin_layout Standard
+Lire à présent le manuel de 
+\family typewriter
+ipv6_care
+\family default
+, puis relancer le service TCP/IPv4 avec 
+\family typewriter
+netcat
+\family default
+ en utilisant le 
+\begin_inset Quotes eld
+\end_inset
+
+tuteur
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\family typewriter
+ipv6_care
+\family default
+.
+ Testez à nouveau depuis 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+: 
+\end_layout
+
+\begin_layout LyX-Code
+m1# nc6 -6 ADRESSE_IPV6 PORT      # ça marche!
+\end_layout
+
+\begin_layout Standard
+Vérifiez, avec une instance de 
+\family typewriter
+wireshark
+\family default
+ lancée sur 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+, que la communication se fait effectivement en IPv6, grâce à 
+\family typewriter
+ipv6_care
+\family default
+, malgré le fait que le service sous tutelle soit implanté en IPv4.
+\end_layout
+
+\begin_layout Subsection
+IPv6 only -> Double pile
+\end_layout
+
+\begin_layout Standard
+Lancer un serveur TCP/IPv6 avec 
+\family typewriter
+nc6
+\family default
+ sur 
+\begin_inset Formula $m_{3}$
+\end_inset
+
+.
+ Testez le bon fonctionnement de la connexion en IPv6 en lançant un client
+ 
+\family typewriter
+nc6 -6
+\family default
+ sur 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+ sur un port quelconque (par exemple 80).
+ Testez à présent l'échec de connexion d'un client exclusivement TCP/IPv4
+ tournant sur 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+:
+\end_layout
+
+\begin_layout LyX-Code
+m1# netcat ADRESSE_IPV4 PORT      # échec!
+\end_layout
+
+\begin_layout Standard
+Relancer alors le service TCP/IPv6 avec 
+\family typewriter
+nc6 -6 
+\family default
+mais, cette fois, en utilisant le 
+\begin_inset Quotes eld
+\end_inset
+
+tuteur
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\family typewriter
+ipv6_care
+\family default
+.
+ Testez à nouveau depuis 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+: 
+\end_layout
+
+\begin_layout LyX-Code
+m1# netcat ADRESSE_IPV4 PORT      # ça marche!
+\end_layout
+
+\begin_layout Standard
+Vérifiez à nouveau, avec une instance de 
+\family typewriter
+wireshark
+\family default
+ lancée sur 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+, que la communication se fait cette fois en IPv4, malgré le fait que le
+ service sous tutelle soit implanté en IPv6.
+\end_layout
+
+\begin_layout Section
+Annexe
+\end_layout
+
+\begin_layout LyX-Code
+$ nmap -6 -sT ::1                    # détecte les ports TCP/IPv6 ouverts
+ sur la machine
+\end_layout
+
+\begin_layout LyX-Code
+$ route -A inet6 ip neigh show       # équivalent de arp mais pour IPv6
+\end_layout
+
+\begin_layout LyX-Code
+$ ipv6_care check netcat -l -p 80    # diagnostic ipv6_care sur un service
+ 
+\begin_inset Quotes eld
+\end_inset
+
+TCP/IPv4 only
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+$ ipv6_care check nc6 -6 -l -p 80    # diagnostic ipv6_care sur un service
+ 
+\begin_inset Quotes eld
+\end_inset
+
+TCP/IPv6 only
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

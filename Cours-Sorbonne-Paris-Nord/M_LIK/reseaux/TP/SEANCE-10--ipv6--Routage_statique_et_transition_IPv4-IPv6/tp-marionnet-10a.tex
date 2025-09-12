@@ -1,0 +1,208 @@
+%% LyX 2.1.4 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[french]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=1.5cm,bmargin=1.5cm,lmargin=2cm,rmargin=2cm}
+\usepackage{graphicx}
+\PassOptionsToPackage{normalem}{ulem}
+\usepackage{ulem}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+\newenvironment{lyxcode}
+{\par\begin{list}{}{
+\setlength{\rightmargin}{\leftmargin}
+\setlength{\listparindent}{0pt}% needed for AMS classes
+\raggedright
+\setlength{\itemsep}{0pt}
+\setlength{\parsep}{0pt}
+\normalfont\ttfamily}%
+ \item[]}
+{\end{list}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+% Added by lyx2lyx
+%  for proper underlining
+\PassOptionsToPackage{normalem}{ulem}
+\usepackage{ulem}
+\let\cite@rig\cite
+\newcommand{\b@xcite}[2][\%]{\def\def@pt{\%}\def\pas@pt{#1}
+  \mbox{\ifx\def@pt\pas@pt\cite@rig{#2}\else\cite@rig[#1]{#2}\fi}}
+\renewcommand{\underbar}[1]{{\let\cite\b@xcite\uline{#1}}}
+\date{}
+
+\makeatother
+
+\usepackage{babel}
+\makeatletter
+\addto\extrasfrench{%
+   \providecommand{\og}{\leavevmode\flqq~}%
+   \providecommand{\fg}{\ifdim\lastskip>\z@\unskip\fi~\frqq}%
+}
+
+\makeatother
+\begin{document}
+
+\title{Travaux Pratiques\\
+Routage statique IPv6 et\\
+transition IPv4 - IPv6 sous Unix avec \texttt{ipv6\_care}}
+
+
+\author{Copyright (C) 2012~~Jean-Vincent Loddo\\
+{\normalsize{}Licence Creative Commons Paternité - Partage à l'Identique
+3.0 non transposé.}}
+
+\maketitle
+Séance de TP entièrement effectuée avec le logiciel Marionnet. Durée
+estimée~: 1h30 avec téléchargements et compilations, 1h sinon.
+
+
+\paragraph*{Prérequis. }
+
+Format des paquets IPv6, double pile TCP/IP (sockets v4/v6).
+
+
+\section{Câblage et configuration des réseaux locaux}
+
+On utilise $3$ machines, $m_{1}$, $m_{2}$ et $m_{3}$, dont une
+en particulier, $m_{2}$, équipée de $2$ interfaces réseau $eth0$
+et $eth1$. Construisez un premier \uline{réseau local} IPv4 $LAN_{1}=\{m_{1},m_{2}[0]\}$
+en $10.0.2.0/24$ en exploitant le service DHCP (v4) fourni par la
+passerelle internet $G_{1}$. Construisez de la même manière un deuxième
+\uline{réseau local} IPv4 $LAN_{2}=\{m_{2}[1],m_{3}\}$ en $10.0.3.0/24$,
+en exploitant le service DHCP (v4) fourni par la passerelle internet
+$G_{2}$. Dans la fenêtre de dialogue des passerelles, vous devez
+cocher l'option ``service DHCP'' et préciser l'adresse réseau desservie. 
+
+
+\paragraph{Distributions GNU/Linux.}
+
+Utilisez la distribution Mandriva pour toutes les machines si vous
+voulez télécharger et compiler les deux logiciels (\texttt{ipv6\_care}
+et \texttt{nc6}). Pour un TP à réaliser en 1 heure, préférez plutôt
+la distribution Debian Wheezy qui contient déjà le logiciel \texttt{ipv6\_care},
+ce qui vous permettra d'éviter le téléchargement et la compilation
+de ce dernier.
+
+\begin{center}
+\includegraphics[scale=0.5]{images/tp-marionnet-9-plan}
+\par\end{center}
+
+
+\paragraph{Numéros IPv4 et routes.}
+
+En lançant des clients dhcp sur les machines, et en définissant correctement
+les tables de routage des machines, chaque machine devra être en mesure
+à la fois (a) d'accéder à internet (en IPv4), et (b) de communiquer
+avec le réseau local IPv4 d'à côté.
+
+
+\section{Installation des logiciels IPv6}
+
+La configuration IPv4 de votre réseau étendu vous permet maintenant
+d'accéder à Internet. Pour la suite de cet exercice, si les adresses
+des logiciels indiquées en argument des commandes \texttt{wget} ne
+sont pas à jour, utilisez l'adresse mirroir sur le site \texttt{www.marionnet.org}
+:
+\begin{lyxcode}
+http://www.marionnet.org/download/contrib/mirror/
+\end{lyxcode}
+qui contient toutes les archives nécessaires (vous pouvez retrouver
+les noms précis avec un butineur, en navigant sur cette page). Téléchargez,
+compilez et installez \uline{sur toutes les machines} (en parallèle
+si possible) les deux logiciels utiles à la suite du TP, par la séquence
+de commandes suivantes~:
+
+
+\subsection{ipv6\_care  }
+\begin{lyxcode}
+\$~wget~http://sourceforge.net/projects/ipv6-care/files/latest/download?source=files~
+
+\$~tar~xvzf~ipv6\_care-{*}.tar.gz~
+
+\$~cd~ipv6\_care-{*}~
+
+\$~./configure~\&\&~make~\&\&~make~check~\&\&~make~install~\&\&~echo~OK
+\end{lyxcode}
+
+\subsection{nc6  (netcat en version IPv6)}
+\begin{lyxcode}
+\$~wget~ftp://ftp.deepspace6.net/pub/ds6/sources/nc6/nc6-1.0.tar.bz2~
+
+\$~tar~xvjf~nc6-1.0.tar.bz2~
+
+\$~cd~nc6-1.0~
+
+\$~./configure~\&\&~make~\&\&~make~install~\&\&~echo~OK
+\end{lyxcode}
+
+\section{Configuration et routage statique IPv6}
+
+Configurez le réseau $LAN_{1}$ en \texttt{2001:db8::/32} et le réseau
+$LAN_{2}$ en \texttt{2001:db9::/32} en assurant le routage IPv6 sur
+la machine $m_{2}$. Utilisez la convention usuelle où $m_{i}$ prend
+comme dernier octet de l'adresse la valeur $i$ (par exemple $m_{3}$
+prendra \texttt{2001:db9::3/32}). Testez la connectivité IPv6 avec
+\texttt{ping6} entre machines du même réseau et machines de réseaux
+différents ($m_{1}$ et $m_{3}$).
+
+
+\section{Donner une compatibilité double pile à un service simple pile sous
+Unix avec \texttt{ipv6\_care}}
+
+
+\subsection{IPv4 only -> Double pile}
+
+Lancer un serveur TCP/IPv4 avec \texttt{netcat} sur $m_{3}$. Testez
+le bon fonctionnement de la connexion en IPv4 en lançant un client
+\texttt{netcat} sur $m_{1}$ sur un port quelconque (par exemple 80).
+Testez à présent l'échec de connexion d'un client exclusivement TCP/IPv6
+tournant sur $m_{1}$~:
+\begin{lyxcode}
+m1\#~nc6~-6~ADRESSE\_IPV6~PORT~~~~~~\#~échec!
+\end{lyxcode}
+Lire à présent le manuel de \texttt{ipv6\_care}, puis relancer le
+service TCP/IPv4 avec \texttt{netcat} en utilisant le ``tuteur''
+\texttt{ipv6\_care}. Testez à nouveau depuis $m_{1}$~: 
+\begin{lyxcode}
+m1\#~nc6~-6~ADRESSE\_IPV6~PORT~~~~~~\#~ça~marche!
+\end{lyxcode}
+Vérifiez, avec une instance de \texttt{wireshark} lancée sur $m_{2}$,
+que la communication se fait effectivement en IPv6, grâce à \texttt{ipv6\_care},
+malgré le fait que le service sous tutelle soit implanté en IPv4.
+
+
+\subsection{IPv6 only -> Double pile}
+
+Lancer un serveur TCP/IPv6 avec \texttt{nc6} sur $m_{3}$. Testez
+le bon fonctionnement de la connexion en IPv6 en lançant un client
+\texttt{nc6 -6} sur $m_{1}$ sur un port quelconque (par exemple 80).
+Testez à présent l'échec de connexion d'un client exclusivement TCP/IPv4
+tournant sur $m_{1}$~:
+\begin{lyxcode}
+m1\#~netcat~ADRESSE\_IPV4~PORT~~~~~~\#~échec!
+\end{lyxcode}
+Relancer alors le service TCP/IPv6 avec \texttt{nc6 -6 }mais, cette
+fois, en utilisant le ``tuteur'' \texttt{ipv6\_care}. Testez à nouveau
+depuis $m_{1}$~: 
+\begin{lyxcode}
+m1\#~netcat~ADRESSE\_IPV4~PORT~~~~~~\#~ça~marche!
+\end{lyxcode}
+Vérifiez à nouveau, avec une instance de \texttt{wireshark} lancée
+sur $m_{2}$, que la communication se fait cette fois en IPv4, malgré
+le fait que le service sous tutelle soit implanté en IPv6.
+
+
+\section{Annexe}
+\begin{lyxcode}
+\$~nmap~-6~-sT~::1~~~~~~~~~~~~~~~~~~~~\#~détecte~les~ports~TCP/IPv6~ouverts~sur~la~machine
+
+\$~route~-A~inet6~ip~neigh~show~~~~~~~\#~équivalent~de~arp~mais~pour~IPv6
+
+\$~ipv6\_care~check~netcat~-l~-p~80~~~~\#~diagnostic~ipv6\_care~sur~un~service~``TCP/IPv4~only''
+
+\$~ipv6\_care~check~nc6~-6~-l~-p~80~~~~\#~diagnostic~ipv6\_care~sur~un~service~``TCP/IPv6~only''\end{lyxcode}
+
+\end{document}
