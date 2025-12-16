@@ -1,0 +1,8 @@
+IP,Score Global,Raison Principale,Ports Ouverts
+192.168.1.12,150,Brute-Force SSH,[]
+203.0.113.5,233,Brute-Force SSH,[]
+10.0.0.10,50,Brute-Force SSH,[]
+198.51.100.23,172,Brute-Force SSH,[]
+192.0.2.44,50,Brute-Force SSH,[]
+192.0.2.45,22,Bot Scanning,Non Scanné/Fermé
+203.0.113.100,10,Bot Scanning,Non Scanné/Fermé
